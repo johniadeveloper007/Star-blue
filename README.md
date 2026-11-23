@@ -1,3 +1,7 @@
+# Star-blue
+
+Proyecto EstudIA Eafit
+
 # Perseo — base de datos de indicadores de proveedores
 
 Perseo implementa la capa de datos para los reportes mensuales de servicio a proveedores nacionales. La solución usa PostgreSQL en producción y Python con SQLAlchemy/Alembic. No incluye interfaz de usuario ni envío de correo.
@@ -53,4 +57,3 @@ pg_dump --format=custom --no-owner --file="$env:TEMP\perseo.dump" "$env:PERSEO_A
 ## Pruebas
 
 Las pruebas unitarias usan SQLite en memoria para validar reglas del modelo y del importador. La migración de producción debe validarse adicionalmente en un PostgreSQL de integración antes de desplegar. Playwright no se incluye aquí: no hay interfaz de navegador en esta entrega; podrá usarse en pruebas E2E cuando el frontend del equipo esté disponible.
-
