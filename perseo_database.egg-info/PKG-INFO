@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: perseo-database
+Version: 0.1.0
+Summary: Database layer for monthly supplier service indicators
+Requires-Python: >=3.11
+Requires-Dist: SQLAlchemy<3.0,>=2.0
+Requires-Dist: alembic<2.0,>=1.15
+Requires-Dist: psycopg[binary]<4.0,>=3.2
+Requires-Dist: python-dotenv<2.0,>=1.0
+Provides-Extra: test
+Requires-Dist: pytest<9.0,>=8.3; extra == "test"

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "perseo-database"
+version = "0.1.0"
+description = "Database layer for monthly supplier service indicators"
+requires-python = ">=3.11"
+dependencies = [
+    "SQLAlchemy>=2.0,<3.0",
+    "alembic>=1.15,<2.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "python-dotenv>=1.0,<2.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.3,<9.0"]
+
+[project.scripts]
+perseo-db = "perseo_db.cli:main"
+
+[tool.setuptools]
+packages = ["perseo_db"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
