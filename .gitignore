@@ -6,3 +6,7 @@ __pycache__/
 htmlcov/
 *.py[cod]
 
+# Local enterprise demo data: may contain test recipient addresses
+Base de datos/demo/*.db
+Base de datos/demo/*.csv
+
