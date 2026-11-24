@@ -2,6 +2,16 @@
 
 Proyecto EstudIA Eafit
 
+# Organización del repositorio
+
+- `API/`: documentos e integraciones de API.
+- `Back End/`: servicios y lógica del backend.
+- `Base de datos/`: modelos, migraciones y configuración de PostgreSQL.
+- `Front End/`: interfaz web.
+- `InfoHaceb/`: información y archivos del reto.
+- `Lider/`: coordinación del equipo.
+- `UI UX (Experiencia de usuario)/`: diseño y experiencia de usuario.
+
 # Perseo — base de datos de indicadores de proveedores
 
 Perseo implementa la capa de datos para los reportes mensuales de servicio a proveedores nacionales. La solución usa PostgreSQL en producción y Python con SQLAlchemy/Alembic. No incluye interfaz de usuario ni envío de correo.

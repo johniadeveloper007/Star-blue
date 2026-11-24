@@ -22,8 +22,9 @@ perseo-db = "perseo_db.cli:main"
 
 [tool.setuptools]
 packages = ["perseo_db"]
+package-dir = {perseo_db = "Back End/HACEB_BACKEND/perseo_db"}
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]
+testpaths = ["Back End/HACEB_BACKEND/tests"]
+pythonpath = ["Back End/HACEB_BACKEND"]
 
