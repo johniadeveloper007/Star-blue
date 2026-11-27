@@ -8,6 +8,7 @@ interface SidebarProps {
 const navigationItems: { label: string; icon: IconName }[] = [
   { label: "Inicio", icon: "home" },
   { label: "Proveedores", icon: "users" },
+  { label: "Reportes mensuales", icon: "activity" },
   { label: "Enviar comunicación", icon: "send" },
   { label: "Plantillas", icon: "file" },
   { label: "Seguimiento", icon: "activity" },
@@ -38,6 +39,7 @@ export function Sidebar({ onNavigate, currentPath = "/" }: SidebarProps) {
           const isActive =
             (item.label === "Inicio" && currentPath === "/") ||
             (item.label === "Proveedores" && currentPath.startsWith("/proveedores")) ||
+            (item.label === "Reportes mensuales" && currentPath.startsWith("/reportes")) ||
             (item.label === "Enviar comunicación" && currentPath.startsWith("/comunicaciones")) ||
             (item.label === "Plantillas" && currentPath.startsWith("/plantillas")) ||
             (item.label === "Seguimiento" && currentPath.startsWith("/seguimiento"));

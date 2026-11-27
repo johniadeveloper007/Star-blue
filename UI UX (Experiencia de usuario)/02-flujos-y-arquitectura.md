@@ -18,6 +18,8 @@ recorridos futuros se marcan como **propuestas**.
 | Biblioteca de plantillas | `/plantillas` | Búsqueda, filtros, vista previa y operaciones locales DEMO de creación, edición, duplicación y eliminación. |
 | Seguimiento | `/seguimiento` | Historial DEMO con búsqueda, filtros, detalle y cronología. |
 | Detalle de seguimiento | `/seguimiento/:communicationId` | Detalle de un registro del historial DEMO. |
+| Reportes mensuales | `/reportes` | Selección local de período y proveedor, consulta de datos sintéticos, vista previa individual, borrador, aprobación/rechazo simulados y simulación de resultado de envío. |
+| Historial de reportes | `/reportes/historial` | Búsqueda, filtro por estado y cronología local de los procesos DEMO de reportes. |
 
 ### Etiquetas del menú y opciones provisionales
 
@@ -72,6 +74,28 @@ confirmaciones de un proveedor de correo o mensajería.
 Los registros combinan ejemplos DEMO y preparaciones locales. Sus estados y
 contadores no son telemetría ni resultados productivos.
 
+### Revisar un reporte mensual DEMO
+
+1. Abrir **Reportes mensuales** desde la navegación lateral.
+2. Seleccionar uno de los períodos sintéticos y uno de los proveedores ficticios
+   existentes en los fixtures DEMO.
+3. Consultar la vista previa individual. Solo hay reportes sintéticos para
+   algunas combinaciones; las demás muestran un mensaje de ausencia de datos.
+4. Revisar las etiquetas neutrales “Métrica DEMO A”, “Métrica DEMO B” y
+   “Métrica DEMO C” con valores ilustrativos. No son resultados oficiales ni
+   representan fórmulas o umbrales.
+5. Guardar un borrador local DEMO antes de registrar una aprobación o un
+   rechazo simulados. La decisión queda guardada en el navegador; el rechazo
+   bloquea la simulación de envío.
+6. Solo después de aprobar DEMO, elegir un resultado exitoso o fallido
+   simulado. No se transmite correo ni otra comunicación.
+7. Consultar el historial independiente de reportes, buscar por proveedor,
+   período o identificador, filtrar por estado y desplegar la actividad local.
+
+El historial de reportes es un dominio independiente del historial de
+comunicaciones. Su persistencia DEMO usa `localStorage` del navegador y no se
+sincroniza con otros usuarios o dispositivos.
+
 ## Estados observables y necesidades futuras
 
 Algunos mensajes y estados ya existen en módulos concretos. Su presencia no
@@ -80,28 +104,27 @@ módulos tengan los mismos estados.
 
 | Estado o comportamiento | Presencia actual | Necesidad futura propuesta |
 |---|---|---|
-| Vacío / sin coincidencias | El directorio muestra un mensaje cuando no hay proveedores que coincidan. Seguimiento muestra “Sin coincidencias” cuando no hay comunicaciones para los filtros. El selector de proveedores del compositor también informa cuando la búsqueda no encuentra opciones DEMO. | Revisar y acordar mensajes y acciones para distinguir, donde corresponda, entre catálogo vacío, búsqueda sin coincidencias y datos temporalmente no disponibles. |
-| Validación | Composición muestra errores de campos; la edición de plantillas valida campos obligatorios y muestra errores. | Revisar consistencia, claridad, asociación con campos y conservación del contexto en cada flujo. |
-| Error | Composición puede informar un fallo al preparar localmente; plantillas informan errores de persistencia local; seguimiento puede mostrar un error al leer su historial. | Definir mensajes y acciones por tipo de error. Los errores de servicios remotos solo se diseñarán cuando exista una integración aprobada. |
-| Carga | No se identificó un estado de carga dedicado para una consulta remota; actualmente los servicios descritos son locales DEMO. | Diseñar retroalimentación de carga para operaciones futuras solo si una integración real la requiere y se acuerdan sus tiempos y comportamiento. |
-| Borrador | El seguimiento puede mostrar registros DEMO con estado de borrador. La preparación desde el compositor guarda un registro local con estado `prepared`; no se identificó un flujo de borrador editable y persistente desde el compositor. | Acordar qué significa un borrador, dónde se guarda, quién puede verlo y si puede editarse. |
-| Aprobación | No se identificó un flujo de aprobación en la interfaz actual. | Acordar actor, permisos, significado y transiciones antes de representarlo. |
-| Envío | No hay envío real. Los estados de envío de registros de ejemplo son simulados; preparar una comunicación no la transmite. | Diseñar solo después de confirmar canal, proveedor y respuesta verificable; diferenciar envío aceptado de entrega o lectura. |
-| Fallo de envío | Los registros `failed` son ejemplos DEMO, no fallos informados por un proveedor de correo o mensajería. | Acordar información visible, reintentos, cancelación e idempotencia con los responsables técnicos y de canal. |
+| Vacío / sin coincidencias | El directorio informa cuando la búsqueda no encuentra proveedores; seguimiento muestra “Sin coincidencias”; el compositor informa si la búsqueda de proveedores no encuentra opciones; reportes mensuales muestra ausencia de datos para una combinación período/proveedor sin fixture; el historial de reportes distingue historial vacío de filtros sin coincidencias. | Revisar y acordar mensajes y acciones para distinguir, donde corresponda, catálogo vacío, búsqueda sin coincidencias y datos temporalmente no disponibles. |
+| Validación | Composición y plantillas muestran validaciones de campos. En reportes DEMO, solicitar vista previa sin seleccionar ambos filtros muestra un mensaje de validación. | Revisar consistencia, claridad, asociación con campos y conservación del contexto en cada flujo. |
+| Error | Composición puede informar un fallo al preparar localmente; plantillas informan errores de persistencia local; seguimiento y reportes pueden mostrar errores al leer el historial; reportes muestran error si no se pueden cargar o guardar datos DEMO. | Definir mensajes y acciones por tipo de error. Los errores de servicios remotos solo se diseñarán cuando exista una integración aprobada. |
+| Carga | Reportes DEMO muestran una indicación durante la lectura inicial local. No es una carga de datos remotos. | Diseñar retroalimentación para operaciones futuras solo si una integración real la requiere y se acuerdan sus tiempos y comportamiento. |
+| Borrador | El compositor de comunicaciones prepara y guarda localmente registros `prepared`; reportes mensuales permite guardar un borrador DEMO local antes de decidir. No son el mismo flujo ni dominio. | Acordar qué significa un borrador productivo, quién puede verlo y si puede editarse. |
+| Aprobación / rechazo | Reportes mensuales permite registrar una aprobación o rechazo simulados después de guardar un borrador. Son acciones locales DEMO; el rechazo bloquea el envío simulado. No representan aprobación funcional ni decisión real de HACEB. | Acordar actor, permisos, significado, evidencia y transiciones antes de definir aprobación productiva. |
+| Envío | No hay envío real. El flujo de reportes habilita una simulación local de resultado solo después de aprobar DEMO; preparar una comunicación tampoco la transmite. | Diseñar solo después de confirmar canal, proveedor y respuesta verificable; diferenciar envío aceptado de entrega o lectura. |
+| Fallo de envío | Reportes permite registrar un resultado fallido simulado y volver a registrar un resultado DEMO; los registros `failed` de comunicaciones son ejemplos, no fallos informados por un proveedor. | Acordar información visible, reintentos, cancelación e idempotencia con los responsables técnicos y de canal. |
 
-No se identificó un estado de carga dedicado ni una cobertura uniforme de los
-estados de vacío, error o validación en todas las pantallas. Las propuestas
-anteriores no describen capacidades actuales.
+Estos comportamientos no estandarizan ni cubren todos los estados en todos los
+módulos. Las necesidades futuras siguen pendientes de validación.
 
 ## Arquitectura observable de la experiencia
 
 ```text
 Aplicación React y rutas
 ├── Navegación compartida: Sidebar, TopBar e iconos
-├── Pantallas: dashboard, proveedores, composición, plantillas y seguimiento
-├── Servicios locales: acceso a datos DEMO
-├── Fixtures: proveedores, plantillas e historial de ejemplo
-└── localStorage: plantillas e historial de preparaciones DEMO
+├── Pantallas: dashboard, proveedores, comunicaciones, plantillas, seguimiento y reportes
+├── Servicios locales separados: comunicaciones y reportes DEMO
+├── Fixtures: proveedores, plantillas, comunicaciones y reportes sintéticos
+└── localStorage: plantillas, historial de comunicaciones e historial de reportes DEMO
 ```
 
 ### Límites de integración y coordinación
@@ -109,6 +132,11 @@ Aplicación React y rutas
 - El frontend actual usa datos y persistencia local DEMO; no consume una API ni
   se conecta directamente a PostgreSQL. La existencia de una variable de URL
   de API no confirma una integración.
+- El flujo de reportes usa períodos y valores sintéticos, y conserva borradores,
+  decisiones y resultados simulados en el almacenamiento local del navegador.
+  No realiza solicitudes a una API ni envía comunicaciones.
+- Los servicios y tipos de reportes están separados del dominio de
+  comunicaciones; sus historiales no se mezclan.
 - Toda futura lectura o escritura persistente debe pasar por una API autorizada
   y validada con backend; no se deben diseñar interacciones como si existieran
   contratos, autenticación, permisos o canales confirmados.
@@ -128,5 +156,10 @@ Aplicación React y rutas
 - [Composición](<../Front End/mi_frontend/src/features/compose/ComposePage.tsx>)
 - [Plantillas](<../Front End/mi_frontend/src/features/templates/TemplatesPage.tsx>)
 - [Seguimiento](<../Front End/mi_frontend/src/features/tracking/TrackingPage.tsx>)
+- [Flujo de reportes mensuales DEMO](<../Front End/mi_frontend/src/features/reports/ReportWorkflowPage.tsx>)
+- [Historial de reportes DEMO](<../Front End/mi_frontend/src/features/reports/ReportHistoryPage.tsx>)
+- [Servicio local DEMO de reportes](<../Front End/mi_frontend/src/services/reportDemoService.ts>)
+- [Fixtures sintéticos de reportes](<../Front End/mi_frontend/src/data/demo/supplierReports.ts>)
+- [Documentación del flujo mensual](<./05-flujo-reportes-mensuales-demo.md>)
 - [Entrega funcional del frontend](<../Front End/mi_frontend/ENTREGA_FRONTEND.md>)
 - [Guía del frontend](<../Front End/mi_frontend/README.md>)

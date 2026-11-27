@@ -25,10 +25,10 @@ código.
 | Tema | Evidencia y alcance |
 |---|---|
 | Producto y frente | La aplicación está identificada como HACEB FUTURE y el repositorio describe una interfaz web para el proyecto. |
-| Áreas funcionales | La entrega frontend documenta dashboard, proveedores, composición de comunicaciones, plantillas y seguimiento. |
+| Áreas funcionales | La entrega frontend documenta dashboard, proveedores, composición de comunicaciones, plantillas, seguimiento y un módulo DEMO de reportes mensuales por proveedor. |
 | Coordinación UI/UX | No se encontró una asignación versionada de responsabilidades UI/UX. La revisión de accesibilidad y experiencia se propone como trabajo de este frente; su coordinación y aprobación deben acordarse. No hay asignación individual confirmada a Yubeini. |
 | Límite de arquitectura | El frontend no debe conectarse directamente a PostgreSQL. No hay consumo de API ni contratos de integración confirmados; cualquier integración futura debe pasar por una API autorizada y validarse con los responsables correspondientes. |
-| Estado del producto | El frontend implementado presenta datos y comportamientos DEMO; no representa todavía una integración productiva con los servicios de HACEB. No hay integración API confirmada, autenticación integrada ni envío real de correos o mensajes. |
+| Estado del producto | El frontend implementado presenta datos y comportamientos DEMO, incluido el recorrido local de reportes mensuales; no representa todavía una integración productiva con los servicios de HACEB. No hay integración API confirmada, autenticación integrada ni envío real de correos o mensajes. |
 | Indicadores | El dashboard usa datos ilustrativos. No hay fórmulas productivas confirmadas en el frontend. Este trabajo no define fórmulas de In-Full, On-Time u OTIF. |
 
 Fuentes versionadas: [documentación general del proyecto](<../README.md>),
@@ -38,6 +38,7 @@ características observables se consultan también el [enrutamiento de la
 aplicación](<../Front End/mi_frontend/src/app/App.tsx>), los
 [estilos](<../Front End/mi_frontend/src/styles/global.css>) y el
 [servicio local de comunicaciones](<../Front End/mi_frontend/src/services/communicationService.ts>).
+El detalle del flujo mensual se registra en [05-flujo-reportes-mensuales-demo.md](<./05-flujo-reportes-mensuales-demo.md>).
 
 ## Características observadas
 
@@ -50,6 +51,12 @@ aplicación](<../Front End/mi_frontend/src/app/App.tsx>), los
 - La biblioteca permite gestionar plantillas en la experiencia DEMO; los
   cambios locales usan `localStorage`.
 - El seguimiento presenta historial DEMO, filtros, detalles y cronología.
+- El módulo de reportes mensuales ofrece `/reportes` y
+  `/reportes/historial`: usa períodos, reportes y métricas sintéticas; permite
+  guardar borrador, aprobar o rechazar simuladamente y registrar resultados de
+  envío simulados en el almacenamiento local. El rechazo bloquea el envío
+  simulado y solo una aprobación DEMO lo habilita. No consume API ni transmite
+  comunicaciones; sus registros están separados del historial de comunicaciones.
 - Los indicadores del dashboard son ilustrativos. Algunos contadores del
   seguimiento se derivan de registros locales; no son métricas de negocio
   aprobadas.
@@ -72,8 +79,9 @@ Pendientes de aprobación; no son capacidades actuales:
 3. Mantener el recorrido de preparación distinto de cualquier aprobación o
    envío. No mostrar éxito de envío o entrega hasta que una integración aprobada
    pueda confirmarlo.
-4. Diseñar y validar estados de borrador, aprobación, envío y fallo solo cuando
-   se acuerden sus significados, actores y transiciones.
+4. Mantener el flujo mensual implementado claramente rotulado como DEMO.
+   Diseñar y validar estados productivos de borrador, aprobación, envío y fallo
+   solo cuando se acuerden sus significados, actores y transiciones.
 5. Revisar navegación por teclado, foco, nombres accesibles, formularios,
    diálogos, contraste y lectura con tecnologías de asistencia.
 6. Comprobar los flujos en anchos de pantalla y dispositivos acordados con
@@ -89,6 +97,9 @@ Pendientes de aprobación; no son capacidades actuales:
   preparación, envío y fallo.
 - Qué datos e indicadores deben aparecer, su fuente oficial y sus definiciones.
   UI/UX no define fórmulas de In-Full, On-Time u OTIF.
+- Qué períodos, criterios de disponibilidad de reportes, actores, permisos y
+  evidencia se requieren para una versión productiva; las decisiones DEMO
+  actuales no representan aprobación de HACEB.
 - Qué partes de proveedores, plantillas, historial y comunicaciones pasarán a
   datos reales y mediante qué contratos aprobados.
 - Responsable, alcance de revisión y formato de coordinación con Yubeini.

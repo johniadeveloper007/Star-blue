@@ -30,6 +30,9 @@ bundle por un canal separado.
   edición, duplicación y eliminación local.
 - Seguimiento DEMO con búsqueda, filtros por estado, modalidad y fechas, detalle
   y línea de tiempo.
+- Flujo DEMO de reportes mensuales por proveedor: selección de período y
+  proveedor, vista previa de métricas sintéticas, borrador, aprobación o rechazo
+  simulados, resultados de envío simulados e historial local.
 
 Las rutas implementadas son:
 
@@ -42,6 +45,8 @@ Las rutas implementadas son:
 | Biblioteca de plantillas | `/plantillas` |
 | Seguimiento | `/seguimiento` |
 | Detalle de seguimiento | `/seguimiento/:communicationId` |
+| Reportes mensuales DEMO | `/reportes` |
+| Historial de reportes DEMO | `/reportes/historial` |
 
 El compositor acepta `?proveedor=` y `?plantilla=` para preseleccionar datos
 DEMO.
@@ -58,12 +63,37 @@ Las plantillas editadas y el historial de preparaciones se guardan en el
 
 - `haceb-future.communication-templates.demo`
 - `haceb-future.communication-history.demo`
+- `haceb-future.supplier-report-workflows.demo.v1`
 
 Ese almacenamiento no sincroniza entre personas, navegadores o dispositivos;
 puede ser eliminado y no es una copia de seguridad. Si falla una escritura de
 plantillas, la interfaz informa el error y no confirma la operación como
 guardada. La preparación DEMO de una comunicación tampoco envía correo o
 mensajes ni confirma entrega o recepción.
+
+## Flujo DEMO de reportes mensuales
+
+El módulo `/reportes` permite seleccionar uno de los períodos sintéticos y uno
+de los proveedores ficticios ya incluidos en los fixtures DEMO. Solo algunas
+combinaciones tienen un reporte de ejemplo; para las demás se muestra un estado
+sin datos. La vista previa muestra tres métricas neutrales —“Métrica DEMO A”,
+“Métrica DEMO B” y “Métrica DEMO C”— con valores ilustrativos. No son datos de
+HACEB y no representan fórmulas, umbrales ni resultados oficiales de In-Full,
+On-Time u OTIF.
+
+El usuario puede guardar un borrador local, aprobarlo o rechazarlo de forma
+simulada. El rechazo bloquea la simulación de envío; solo un reporte aprobado
+DEMO habilita simular un resultado exitoso o fallido. Un fallo permite otra
+simulación; un resultado exitoso termina las acciones de envío para ese
+registro. Estas decisiones y resultados se guardan en el historial accesible
+desde `/reportes/historial`, con búsqueda, filtro de estado y actividad por
+registro.
+
+El historial de reportes está separado del historial de comunicaciones y se
+persiste en `localStorage` del mismo navegador y origen. No se sincroniza con
+otros usuarios ni constituye un registro oficial. La aprobación y el envío son
+simulaciones locales: no hay autorización productiva ni transmisión de correo
+u otra comunicación.
 
 ## Indicadores y decisiones pendientes
 
@@ -96,11 +126,21 @@ npm.cmd run typecheck
 npm.cmd run build
 ```
 
-No hay un script `test` ni una suite automatizada configurada. En esta entrega,
-`npm.cmd run typecheck` terminó correctamente y `npm.cmd run build` compiló
-correctamente 56 módulos. También pasaron siete casos del patrón de validación
-de correo (dos válidos y cinco inválidos). Las pruebas manuales de interfaz
-fueron reportadas como satisfactorias por el equipo.
+No hay un script `test` ni una suite automatizada configurada. En la
+verificación del módulo DEMO, `npm.cmd run typecheck` terminó correctamente y
+`npm.cmd run build` compiló correctamente 61 módulos. También pasaron siete
+casos del patrón de validación de correo (dos válidos y cinco inválidos).
+Las pruebas manuales de interfaz del frontend existente fueron reportadas como
+satisfactorias por el equipo.
+
+La verificación manual en navegador del flujo mensual comprobó selección y
+vista previa, combinación sin reporte, validación de selección, borrador e
+historial persistentes tras recargar, rechazo bloqueante, aprobación habilitante,
+resultados simulados exitoso y fallido, reintento tras fallo, filtros sin
+coincidencias, recuperación con filtros limpios, rutas heredadas y diseño móvil
+sin desbordamiento horizontal. También se comprobó que los errores de lectura y
+escritura del almacenamiento muestran error sin falso mensaje de éxito. No se
+observaron solicitudes externas durante las interacciones ni envíos reales.
 
 El build genera `dist/` y metadatos de TypeScript bajo `node_modules/.tmp/`;
 ambos son artefactos locales ignorados por Git. `npm.cmd ci` reinstala
@@ -115,6 +155,11 @@ empleado, no tiene persistencia central y no se conecta directamente a
 PostgreSQL. Tampoco implementa envío real de correo o mensajería. Los servicios
 actuales leen datos DEMO locales.
 
+Los períodos, reportes y métricas mensuales son fixtures estáticos. Las
+decisiones, eventos y resultados de envío de ese módulo se guardan solo en el
+navegador; no hay sincronización, aprobación funcional, auditoría central ni
+integración con el sistema de proveedores de HACEB.
+
 Backend, frontend e identidad deben confirmar antes de implementar cualquier
 integración: contratos y modelos de API, autorización y roles, fuente oficial
 de proveedores, persistencia y versionado de plantillas, estados y eventos,
@@ -122,6 +167,11 @@ permisos para preparar o autorizar comunicaciones, tratamiento de errores,
 idempotencia, seguridad y privacidad. No hay endpoints confirmados ni
 consumidos por esta entrega. `VITE_API_BASE_URL` vacía no establece una
 conexión. No introducir secretos en variables `VITE_*`.
+
+Para reportes mensuales también deben validarse externamente la fuente,
+definición y fórmula de cada indicador, los períodos, los actores y permisos de
+aprobación/rechazo, y el canal y significado de cualquier envío productivo. Esta
+entrega no decide esos puntos.
 
 ## Recuperar la rama desde el bundle en otro computador
 

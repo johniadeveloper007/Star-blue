@@ -9,6 +9,8 @@ import { SupplierDetailPage } from "../features/suppliers/SupplierDetailPage";
 import { ComposePage } from "../features/compose/ComposePage";
 import { TemplatesPage } from "../features/templates/TemplatesPage";
 import { TrackingPage } from "../features/tracking/TrackingPage";
+import { ReportWorkflowPage } from "../features/reports/ReportWorkflowPage";
+import { ReportHistoryPage } from "../features/reports/ReportHistoryPage";
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,6 +30,8 @@ export default function App() {
       Inicio: "/",
       Proveedores: "/proveedores",
       "Consultar proveedores": "/proveedores",
+      "Reportes mensuales": "/reportes",
+      "Historial de reportes": "/reportes/historial",
       "Enviar comunicación": "/comunicaciones/nueva",
       Plantillas: "/plantillas",
       "Gestionar plantillas": "/plantillas",
@@ -54,6 +58,8 @@ export default function App() {
           ? "PLANTILLAS"
           : location.pathname.startsWith("/seguimiento")
             ? "SEGUIMIENTO"
+          : location.pathname.startsWith("/reportes")
+            ? "REPORTES"
           : "INICIO";
 
   return (
@@ -109,6 +115,14 @@ export default function App() {
           <Route
             path="/seguimiento/:communicationId"
             element={<TrackingPage />}
+          />
+          <Route
+            path="/reportes"
+            element={<ReportWorkflowPage />}
+          />
+          <Route
+            path="/reportes/historial"
+            element={<ReportHistoryPage />}
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
