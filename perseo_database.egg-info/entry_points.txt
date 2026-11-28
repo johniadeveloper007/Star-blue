@@ -1,2 +1,0 @@
-[console_scripts]
-perseo-db = perseo_db.cli:main
