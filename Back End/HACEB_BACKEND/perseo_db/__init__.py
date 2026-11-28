@@ -1,2 +1,0 @@
-"""Perseo database package."""
-
