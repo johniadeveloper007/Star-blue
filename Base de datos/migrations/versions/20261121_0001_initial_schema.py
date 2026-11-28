@@ -243,6 +243,22 @@ def upgrade() -> None:
                 "unit": "percent",
                 "is_active": True,
             },
+            {
+                "id": uuid.UUID("d4f7bd4c-59d9-4ad0-9470-1c9a54873004"),
+                "code": "inventory_level",
+                "label": "Nivel de inventario",
+                "description": "Nivel agregado de inventario calculado por la fuente del PBIX.",
+                "unit": "percent",
+                "is_active": True,
+            },
+            {
+                "id": uuid.UUID("d4f7bd4c-59d9-4ad0-9470-1c9a54873005"),
+                "code": "inhouse_compliance",
+                "label": "Cumplimiento in-house",
+                "description": "Calificación mensual in-house entregada por la fuente del PBIX.",
+                "unit": "percent",
+                "is_active": True,
+            },
         ],
     )
 
