@@ -48,6 +48,10 @@
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.12);
         }
+        #github-refresh-btn:disabled {
+            cursor: wait;
+            opacity: 0.55;
+        }
         /* Globos de diálogo flotantes en 3D */
         .speech-bubble {
             position: absolute;
@@ -98,7 +102,7 @@
             <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]"></div>
             <div>
                 <h1 class="text-sm sm:text-base font-bold tracking-tight text-white leading-tight">Oficina del equipo Perseo</h1>
-                <p id="active-status-subtitle" class="text-[11px] text-slate-300 hidden sm:block">Demo • Mensajes y estados simulados, sin conexión en vivo</p>
+                <p id="active-status-subtitle" class="text-[11px] text-slate-300 hidden sm:block">Actividad del repositorio Star-blue</p>
             </div>
         </div>
 
@@ -138,18 +142,26 @@
         </div>
     </header>
 
-    <!-- Panel Lateral Derecho: Bitácora del Equipo y Controles de Mensaje -->
+    <!-- Panel lateral: actividad de GitHub y bitácora local -->
     <aside id="log-panel" class="fixed top-20 right-3 bottom-20 w-80 sm:w-96 z-20 glass-panel rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-transform duration-300 translate-x-0">
-        <div class="px-4 py-3 border-b border-slate-700/70 flex items-center justify-between bg-slate-900/50">
+        <div class="px-4 py-3 border-b border-slate-700/70 bg-slate-900/50">
             <div>
                 <h2 class="text-sm font-bold text-white flex items-center gap-2">
-                    <span>📡 Bitácora en Vivo</span>
+                    <span id="log-panel-title">Actividad de GitHub</span>
                 </h2>
-                <p class="text-[11px] text-slate-400">Trabajo, reuniones y pausas recreativas</p>
+                <p id="github-activity-status" role="status" aria-live="polite" class="text-[11px] text-slate-400 mt-1">Conectando con GitHub...</p>
             </div>
-            <button onclick="triggerAutoDialogue()" class="text-[11px] bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 px-2.5 py-1 rounded-xl transition font-medium">
-                + Interacción
-            </button>
+            <div class="flex items-center gap-1 mt-3">
+                <button id="github-view-btn" onclick="setLogView('github')" aria-pressed="true" class="flex-1 text-[11px] bg-violet-500/20 text-violet-200 border border-violet-400/40 px-2 py-1.5 rounded-lg transition font-medium">
+                    GitHub
+                </button>
+                <button id="team-view-btn" onclick="setLogView('team')" aria-pressed="false" class="flex-1 text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-1.5 rounded-lg transition font-medium">
+                    Oficina
+                </button>
+                <button id="github-refresh-btn" onclick="refreshGithubActivity()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-lg transition" title="Actualizar actividad desde GitHub" aria-label="Actualizar actividad de GitHub">
+                    ↻
+                </button>
+            </div>
         </div>
 
         <!-- Lista de mensajes de la bitácora -->
@@ -158,7 +170,12 @@
         </div>
 
         <!-- Formulario para actualizar el mensaje de un agente -->
-        <form id="message-form" onsubmit="handlePostMessage(event)" class="p-3 border-t border-slate-700/70 bg-slate-900/70 space-y-2">
+        <div id="team-controls" class="hidden p-3 border-t border-slate-700/70 bg-slate-900/70">
+            <button onclick="triggerAutoDialogue()" class="w-full text-[11px] bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 px-2.5 py-1.5 rounded-xl transition font-medium">
+                + Interacción simulada
+            </button>
+        </div>
+        <form id="message-form" onsubmit="handlePostMessage(event)" class="hidden p-3 border-t border-slate-700/70 bg-slate-900/70 space-y-2">
             <div class="flex items-center gap-2">
                 <label for="agent-select" class="text-[11px] text-slate-400 font-medium">Agente:</label>
                 <select id="agent-select" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500">
@@ -245,7 +262,7 @@
                 position: { x: -4.4, z: 2.8 },
                 rotationY: Math.PI / 3.5,
                 isDualFemale: false,
-                lastMessage: 'Demo: organizando el esquema y el historial de los reportes.'
+                lastMessage: 'PBIX importado: 6.890 reportes. Pendiente validar reglas OTIF y PostgreSQL.'
             },
             {
                 id: 'frontend',
@@ -301,10 +318,10 @@
             {
                 a: 'pedro', b: 'perseo',
                 spot: { x: -2.2, z: 1.5 },
-                lineA: 'Perseo, ¿qué podría guardar el esquema de reportes?',
-                lineB: 'Proveedores, períodos, métricas y el historial de revisiones.',
+                lineA: 'Perseo, ¿cómo va la capa de datos?',
+                lineB: 'El PBIX ya se importó: 6.890 reportes. Falta validar reglas OTIF y PostgreSQL.',
                 logAgent: 'perseo',
-                logText: 'Demo: esquema de ejemplo para reportes mensuales.'
+                logText: 'PBIX importado: 6.890 reportes. Pendiente validar reglas OTIF y PostgreSQL de integración.'
             },
             {
                 a: 'ana', b: 'sofia',
@@ -365,11 +382,21 @@
         // Historial inicial de la bitácora del equipo
         const teamLogs = [
             { agentId: 'ribe', time: '09:00', text: 'DEMO: revisando prioridades y próximos hitos.' },
-            { agentId: 'perseo', time: '09:12', text: 'DEMO: bosquejo de datos para reportes mensuales.' },
+            { agentId: 'perseo', time: '09:12', text: 'PBIX importado: 6.890 reportes. Pendiente validar reglas OTIF y PostgreSQL de integración.' },
             { agentId: 'pedro', time: '09:25', text: 'DEMO: preparando una validación de ejemplo.' },
             { agentId: 'juanse', time: '09:40', text: 'DEMO: propuesta de contrato para la integración.' },
             { agentId: 'frontend', time: '09:55', text: 'DEMO: diseñando una vista de seguimiento.' }
         ];
+        const GITHUB_REPO_API = 'https://api.github.com/repos/johniadeveloper007/Star-blue';
+        const GITHUB_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+        const GITHUB_MAX_BRANCHES = 8;
+        let logView = 'github';
+        let githubCommits = [];
+        let githubPullRequests = [];
+        let githubActivityLoaded = false;
+        let githubActivityLoading = false;
+        let githubActivityError = '';
+        let githubLastUpdated = null;
 
         // Variables globales de Three.js
         let scene, camera, renderer, controls;
@@ -436,6 +463,8 @@
             buildAllAgentStations();
             renderDeskNav();
             renderLogFeed();
+            refreshGithubActivity();
+            window.setInterval(refreshGithubActivity, GITHUB_REFRESH_INTERVAL_MS);
             setupEvents();
 
             setTimeout(() => {
@@ -955,12 +984,12 @@
             });
 
             const notes = [
-                { x: 34, y: 95, color: '#fef08a', txt: 'Revisar métricas' },
+                { x: 34, y: 95, color: '#fef08a', txt: 'Desplegar PostgreSQL' },
                 { x: 34, y: 155, color: '#fbcfe8', txt: 'Pulir correo demo' },
-                { x: 194, y: 95, color: '#bfdbfe', txt: 'Probar importación' },
+                { x: 194, y: 95, color: '#bfdbfe', txt: 'Validar reglas OTIF' },
                 { x: 194, y: 155, color: '#fbcfe8', txt: 'Diseñar panel' },
-                { x: 354, y: 95, color: '#bbf7d0', txt: 'Datos de ejemplo' },
-                { x: 354, y: 155, color: '#fde68a', txt: 'Prototipo visual' }
+                { x: 354, y: 95, color: '#bbf7d0', txt: 'PBIX importado' },
+                { x: 354, y: 155, color: '#fde68a', txt: '5 tests pasan' }
             ];
             notes.forEach(n => {
                 ctx.fillStyle = n.color;
@@ -2190,6 +2219,38 @@
             const feed = document.getElementById('log-feed');
             feed.innerHTML = '';
 
+            const githubView = logView === 'github';
+            const status = document.getElementById('github-activity-status');
+            const teamControls = document.getElementById('team-controls');
+            const messageForm = document.getElementById('message-form');
+            const refreshButton = document.getElementById('github-refresh-btn');
+
+            document.getElementById('log-panel-title').textContent = githubView
+                ? 'Actividad de GitHub'
+                : 'Bitácora de la oficina';
+            document.getElementById('github-view-btn').setAttribute('aria-pressed', String(githubView));
+            document.getElementById('team-view-btn').setAttribute('aria-pressed', String(!githubView));
+            teamControls.classList.toggle('hidden', githubView);
+            messageForm.classList.toggle('hidden', githubView);
+            refreshButton.classList.toggle('hidden', !githubView);
+
+            if (githubView) {
+                if (githubActivityLoading) {
+                    status.textContent = githubActivityLoaded
+                        ? 'Actualizando actividad desde GitHub...'
+                        : 'Consultando actividad pública del repositorio...';
+                } else if (githubActivityError) {
+                    status.textContent = `No se pudo actualizar: ${githubActivityError}`;
+                } else if (githubLastUpdated) {
+                    status.textContent = `Actualizado ${formatGithubDate(githubLastUpdated.toISOString())}`;
+                } else {
+                    status.textContent = 'Actividad pública del repositorio';
+                }
+                renderGithubActivity(feed);
+                return;
+            }
+
+            status.textContent = 'Mensajes simulados localmente; no se publican en GitHub.';
             teamLogs.forEach(entry => {
                 const agent = AGENTS_DATA.find(a => a.id === entry.agentId) || AGENTS_DATA[0];
                 const card = document.createElement('div');
@@ -2209,6 +2270,233 @@
                 feed.appendChild(card);
             });
             feed.scrollTop = feed.scrollHeight;
+        }
+
+        function setLogView(view) {
+            if (view !== 'github' && view !== 'team') return;
+            logView = view;
+            renderLogFeed();
+            if (view === 'github' && !githubActivityLoaded && !githubActivityLoading) {
+                refreshGithubActivity();
+            }
+        }
+
+        function formatGithubDate(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return 'Fecha no disponible';
+            return new Intl.DateTimeFormat('es-CO', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            }).format(date);
+        }
+
+        function createGithubLink(label, url, className) {
+            const link = document.createElement('a');
+            link.textContent = label;
+            link.className = className;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            try {
+                const parsedUrl = new URL(url);
+                if (parsedUrl.origin !== 'https://github.com') {
+                    throw new Error('GitHub devolvió un enlace fuera de github.com.');
+                }
+                link.href = parsedUrl.href;
+            } catch (error) {
+                link.removeAttribute('target');
+                link.removeAttribute('rel');
+                link.removeAttribute('href');
+                link.title = error instanceof Error ? error.message : String(error);
+            }
+            return link;
+        }
+
+        function renderGithubActivity(feed) {
+            if (!githubActivityLoaded) {
+                const message = document.createElement('p');
+                message.className = 'rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-slate-300';
+                message.textContent = githubActivityError
+                    ? 'La actividad no está disponible. Comprueba la conexión y vuelve a intentar.'
+                    : 'Cargando commits, ramas y pull requests...';
+                feed.appendChild(message);
+                if (githubActivityError) {
+                    const retryButton = document.createElement('button');
+                    retryButton.type = 'button';
+                    retryButton.textContent = 'Reintentar';
+                    retryButton.className = 'rounded-lg border border-violet-400/40 bg-violet-500/20 px-3 py-2 text-violet-100 hover:bg-violet-500/30';
+                    retryButton.onclick = refreshGithubActivity;
+                    feed.appendChild(retryButton);
+                }
+                return;
+            }
+
+            const explanation = document.createElement('p');
+            explanation.className = 'text-[11px] leading-relaxed text-slate-400';
+            explanation.textContent = 'Datos públicos del repositorio: último commit de cada rama y pull requests abiertos. Solo lectura.';
+            feed.appendChild(explanation);
+
+            const branchHeading = document.createElement('h3');
+            branchHeading.className = 'pt-1 text-[11px] font-bold uppercase tracking-wide text-violet-200';
+            branchHeading.textContent = `Actividad por rama (${githubCommits.length})`;
+            feed.appendChild(branchHeading);
+
+            if (githubCommits.length === 0) {
+                const emptyBranches = document.createElement('p');
+                emptyBranches.className = 'text-slate-400';
+                emptyBranches.textContent = 'No se encontraron ramas con commits.';
+                feed.appendChild(emptyBranches);
+            }
+
+            githubCommits.forEach(entry => {
+                const commit = entry.commit;
+                const details = commit.commit || {};
+                const authorName = (commit.author && commit.author.login)
+                    || (details.author && details.author.name)
+                    || 'Autor no disponible';
+                const message = (details.message || 'Commit sin mensaje').split('\n')[0];
+                const branchNames = entry.branches.join(', ');
+                const card = document.createElement('article');
+                card.className = 'rounded-xl border border-slate-800 bg-slate-900/80 p-2.5';
+
+                const metadata = document.createElement('div');
+                metadata.className = 'mb-1 flex items-center justify-between gap-2';
+                const branch = document.createElement('span');
+                branch.className = 'truncate rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] text-violet-200';
+                branch.textContent = branchNames;
+                branch.title = branchNames;
+                metadata.appendChild(branch);
+
+                const date = document.createElement('time');
+                date.className = 'shrink-0 text-[10px] text-slate-500';
+                date.dateTime = details.author && details.author.date ? details.author.date : '';
+                date.textContent = formatGithubDate(date.dateTime);
+                metadata.appendChild(date);
+                card.appendChild(metadata);
+
+                const title = createGithubLink(
+                    message,
+                    commit.html_url,
+                    'block break-words font-semibold leading-relaxed text-slate-100 hover:text-sky-300'
+                );
+                card.appendChild(title);
+
+                const author = document.createElement('p');
+                author.className = 'mt-1 text-[10px] text-slate-400';
+                author.textContent = `Commit de ${authorName}`;
+                card.appendChild(author);
+                feed.appendChild(card);
+            });
+
+            const pullRequestHeading = document.createElement('h3');
+            pullRequestHeading.className = 'pt-2 text-[11px] font-bold uppercase tracking-wide text-sky-200';
+            pullRequestHeading.textContent = `Pull requests abiertos (${githubPullRequests.length})`;
+            feed.appendChild(pullRequestHeading);
+
+            if (githubPullRequests.length === 0) {
+                const emptyPullRequests = document.createElement('p');
+                emptyPullRequests.className = 'text-slate-400';
+                emptyPullRequests.textContent = 'No hay pull requests abiertos en este momento.';
+                feed.appendChild(emptyPullRequests);
+            }
+
+            githubPullRequests.forEach(pullRequest => {
+                const card = document.createElement('article');
+                card.className = 'rounded-xl border border-slate-800 bg-slate-900/80 p-2.5';
+                const title = createGithubLink(
+                    `#${pullRequest.number} ${pullRequest.title}`,
+                    pullRequest.html_url,
+                    'block break-words font-semibold leading-relaxed text-slate-100 hover:text-sky-300'
+                );
+                card.appendChild(title);
+
+                const metadata = document.createElement('p');
+                metadata.className = 'mt-1 text-[10px] text-slate-400';
+                const authorName = pullRequest.user && pullRequest.user.login
+                    ? pullRequest.user.login
+                    : 'autor no disponible';
+                metadata.textContent = `Por ${authorName} · actualizado ${formatGithubDate(pullRequest.updated_at)}`;
+                card.appendChild(metadata);
+                feed.appendChild(card);
+            });
+        }
+
+        async function fetchGithubJson(path, signal) {
+            const response = await fetch(`${GITHUB_REPO_API}${path}`, {
+                headers: { Accept: 'application/vnd.github+json' },
+                signal
+            });
+            if (!response.ok) {
+                throw new Error(`GitHub API respondió ${response.status} ${response.statusText}`.trim());
+            }
+            return response.json();
+        }
+
+        async function refreshGithubActivity() {
+            if (githubActivityLoading) return;
+
+            githubActivityLoading = true;
+            githubActivityError = '';
+            const refreshButton = document.getElementById('github-refresh-btn');
+            if (refreshButton) refreshButton.disabled = true;
+            renderLogFeed();
+
+            const controller = new AbortController();
+            const timeout = window.setTimeout(() => controller.abort(), 15000);
+            try {
+                const [branches, pullRequests] = await Promise.all([
+                    fetchGithubJson('/branches?per_page=100', controller.signal),
+                    fetchGithubJson('/pulls?state=open&per_page=10&sort=updated&direction=desc', controller.signal)
+                ]);
+                if (!Array.isArray(branches) || !Array.isArray(pullRequests)) {
+                    throw new Error('GitHub devolvió un formato de respuesta inesperado.');
+                }
+
+                const preferredBranches = ['main', 'database/perseo', 'oficina/oficina-3d'];
+                const selectedBranches = branches
+                    .slice()
+                    .sort((left, right) => {
+                        const leftRank = preferredBranches.indexOf(left.name);
+                        const rightRank = preferredBranches.indexOf(right.name);
+                        const normalizedLeftRank = leftRank < 0 ? preferredBranches.length : leftRank;
+                        const normalizedRightRank = rightRank < 0 ? preferredBranches.length : rightRank;
+                        return normalizedLeftRank - normalizedRightRank
+                            || left.name.localeCompare(right.name);
+                    })
+                    .slice(0, GITHUB_MAX_BRANCHES);
+
+                const uniqueBranchHeads = new Map();
+                selectedBranches.forEach(branch => {
+                    if (!branch.name || !branch.commit || !branch.commit.sha) return;
+                    const branchNames = uniqueBranchHeads.get(branch.commit.sha) || [];
+                    branchNames.push(branch.name);
+                    uniqueBranchHeads.set(branch.commit.sha, branchNames);
+                });
+
+                const commitsByHead = await Promise.all(
+                    Array.from(uniqueBranchHeads.entries()).map(async ([sha, branchNames]) => ({
+                        branches: branchNames,
+                        commit: await fetchGithubJson(`/commits/${encodeURIComponent(sha)}`, controller.signal)
+                    }))
+                );
+
+                githubCommits = commitsByHead.sort((left, right) => {
+                    const leftDate = new Date(left.commit.commit?.author?.date || 0).getTime();
+                    const rightDate = new Date(right.commit.commit?.author?.date || 0).getTime();
+                    return rightDate - leftDate;
+                });
+                githubPullRequests = pullRequests;
+                githubActivityLoaded = true;
+                githubLastUpdated = new Date();
+            } catch (error) {
+                githubActivityError = error && error.name === 'AbortError'
+                    ? 'la solicitud excedió 15 segundos'
+                    : error instanceof Error ? error.message : String(error);
+            } finally {
+                window.clearTimeout(timeout);
+                githubActivityLoading = false;
+                if (refreshButton) refreshButton.disabled = false;
+                renderLogFeed();
+            }
         }
 
         function pushTeamLog(agentId, messageText) {
