@@ -50,6 +50,17 @@ Antes de conectar el origen real, hay que confirmar columnas, claves, definició
 
 La función de importación es dueña de sus transacciones. El checksum es único, y cualquier error durante el proceso deja el lote marcado como fallido, revierte todos los registros del lote y vuelve a propagar el error.
 
+### Construir la base desde el PBIX
+
+Instalar la dependencia opcional y ejecutar:
+
+```powershell
+pip install -e ".[powerbi]"
+python "Base de datos\import_pbix_perseo.py"
+```
+
+El resultado se crea en `Base de datos\powerbi_perseo.db`. El proceso extrae proveedores, periodos y las métricas disponibles en las tablas embebidas del PBIX y deja trazabilidad mediante un lote con SHA-256.
+
 ## Operación y seguridad
 
 - Mantener `perseo_app` sin privilegios de migración y `perseo_migrator` separado. Ejecutar `ops/roles.sql` con una cuenta administradora; la asignación de `LOGIN` y contraseñas corresponde al gestor corporativo de secretos.

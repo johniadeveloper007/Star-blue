@@ -3,5 +3,8 @@ alembic<2.0,>=1.15
 psycopg[binary]<4.0,>=3.2
 python-dotenv<2.0,>=1.0
 
+[powerbi]
+pbixray<0.16,>=0.15.5
+
 [test]
 pytest<9.0,>=8.3

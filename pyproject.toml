@@ -16,6 +16,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8.3,<9.0"]
+powerbi = ["pbixray>=0.15.5,<0.16"]
 
 [project.scripts]
 perseo-db = "perseo_db.cli:main"

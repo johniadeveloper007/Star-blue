@@ -9,3 +9,5 @@ Requires-Dist: psycopg[binary]<4.0,>=3.2
 Requires-Dist: python-dotenv<2.0,>=1.0
 Provides-Extra: test
 Requires-Dist: pytest<9.0,>=8.3; extra == "test"
+Provides-Extra: powerbi
+Requires-Dist: pbixray<0.16,>=0.15.5; extra == "powerbi"
