@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { Icon } from "../../components/Icon";
-import { demoCommunications, demoMetrics, demoWeeklyActivity } from "./dashboardData";
+import { perseoApi } from "../../services/perseoApi";
+import type { DashboardSummary } from "../../types/perseoApi";
+import { demoCommunications, demoWeeklyActivity } from "./dashboardData";
 
 interface DashboardPageProps {
   searchTerm: string;
@@ -39,13 +42,97 @@ function formatToday() {
   }).format(new Date());
 }
 
+function formatCount(value: number) {
+  return new Intl.NumberFormat("es-CO").format(value);
+}
+
+function formatReportingPeriod(value: string | null) {
+  if (!value) return "Sin períodos";
+  return new Intl.DateTimeFormat("es-CO", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function formatPercent(value: number | undefined) {
+  if (value === undefined) return "Sin datos";
+  return `${new Intl.NumberFormat("es-CO", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value)} %`;
+}
+
 export function DashboardPage({ searchTerm, onAction }: DashboardPageProps) {
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
   const normalizedSearch = searchTerm.trim().toLocaleLowerCase("es");
   const visibleCommunications = demoCommunications.filter((communication) =>
     `${communication.supplier} ${communication.subject}`
       .toLocaleLowerCase("es")
       .includes(normalizedSearch),
   );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    setLoading(true);
+    setLoadError("");
+
+    perseoApi.getDashboardSummary(controller.signal)
+      .then((result) => {
+        if (active) setSummary(result);
+      })
+      .catch((error: unknown) => {
+        if (!active || (error instanceof DOMException && error.name === "AbortError")) return;
+        setLoadError(error instanceof Error ? error.message : "No fue posible consultar los indicadores.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [reloadKey]);
+
+  const actualMetrics = summary
+    ? [
+        {
+          label: "Proveedores",
+          value: formatCount(summary.supplier_count),
+          detail: `${formatCount(summary.active_supplier_count)} activos`,
+          icon: "users" as const,
+          style: "mint" as const,
+        },
+        {
+          label: "Reportes mensuales",
+          value: formatCount(summary.report_count),
+          detail: `${formatCount(summary.period_count)} períodos con datos`,
+          icon: "activity" as const,
+          style: "blue" as const,
+        },
+        {
+          label: "Último período",
+          value: formatReportingPeriod(summary.latest_period),
+          detail: summary.latest_period ?? "Sin períodos registrados",
+          icon: "clock" as const,
+          style: "amber" as const,
+        },
+        {
+          label: "Cumplimiento general",
+          value: formatPercent(summary.latest_metrics.overall_compliance),
+          detail: summary.latest_period
+            ? `Promedio del período ${formatReportingPeriod(summary.latest_period)}`
+            : "Sin métricas recientes",
+          icon: "sparkles" as const,
+          style: "lime" as const,
+        },
+      ]
+    : [];
 
   return (
     <main className="dashboard-page" id="inicio">
@@ -57,7 +144,7 @@ export function DashboardPage({ searchTerm, onAction }: DashboardPageProps) {
           </p>
           <h1 id="welcome-title">{getGreeting()}, equipo.</h1>
           <p className="welcome-copy">
-            Un lugar más simple para fortalecer cada relación con proveedores.
+            Consulta indicadores y proveedores importados desde Power BI.
           </p>
         </div>
         <div className="today-label">
@@ -180,40 +267,64 @@ export function DashboardPage({ searchTerm, onAction }: DashboardPageProps) {
           <Icon name="sparkles" size={15} />
         </span>
         <span>
-          <strong>Modo demostración</strong>
+          <strong>Indicadores reales de Perseo</strong>
           <span className="demo-notice-divider">·</span>
-          Cifras y comunicaciones de ejemplo; no representan actividad real ni se ha enviado ningún correo.
+          Proveedores e indicadores de Power BI en modo de solo lectura. Comunicaciones y seguimiento siguen en DEMO.
         </span>
-        <span className="demo-label">DEMO</span>
+        <span className="demo-label">REAL · PBIX</span>
       </div>
 
-      <section className="metrics-section" aria-label="Indicadores de demostración">
+      <section className="metrics-section" aria-label="Indicadores reales de proveedores">
         <div className="section-heading">
           <div>
             <p className="section-overline">UNA MIRADA RÁPIDA</p>
-            <h2>Tu espacio, en contexto</h2>
+            <h2>Servicio a proveedores</h2>
           </div>
-          <span className="data-tag">DATOS DEMO</span>
+          <span className="data-tag">DATOS REALES · PBIX</span>
         </div>
-        <div className="metrics-grid">
-          {demoMetrics.map((metric, index) => (
-            <article
-              className={`metric-card metric-${metric.style}`}
-              key={metric.label}
-              style={{ animationDelay: `${index * 70}ms` }}
-            >
-              <div className="metric-card-top">
-                <span className="metric-icon">
-                  <Icon name={metric.icon} size={18} />
-                </span>
-                <span className="metric-demo">DEMO</span>
-              </div>
-              <p className="metric-value">{metric.value}</p>
-              <h3>{metric.label}</h3>
-              <p className="metric-detail">{metric.detail}</p>
-            </article>
-          ))}
-        </div>
+        {loading && !summary && <p className="api-state" role="status">Cargando indicadores reales…</p>}
+        {loadError && !summary && (
+          <div className="api-state api-state-error" role="alert">
+            <p>No se pudo conectar con la base de datos: {loadError}</p>
+            <button className="button-primary" type="button" onClick={() => setReloadKey((value) => value + 1)}>
+              Reintentar
+            </button>
+          </div>
+        )}
+        {loading && summary && <p className="api-refresh-status" role="status">Actualizando datos…</p>}
+        {loadError && summary && (
+          <p className="api-refresh-status api-refresh-error" role="alert">
+            No se pudo actualizar; se muestran los últimos datos recibidos. {loadError}
+          </p>
+        )}
+        {summary && (
+          <>
+            <div className="metrics-grid">
+              {actualMetrics.map((metric, index) => (
+                <article
+                  className={`metric-card metric-${metric.style}`}
+                  key={metric.label}
+                  style={{ animationDelay: `${index * 70}ms` }}
+                >
+                  <div className="metric-card-top">
+                    <span className="metric-icon">
+                      <Icon name={metric.icon} size={18} />
+                    </span>
+                    <span className="metric-demo">PBIX</span>
+                  </div>
+                  <p className="metric-value">{metric.value}</p>
+                  <h3>{metric.label}</h3>
+                  <p className="metric-detail">{metric.detail}</p>
+                </article>
+              ))}
+            </div>
+            {summary.latest_import && (
+              <p className="api-source-note">
+                Fuente: {summary.latest_import.source_system} · {formatCount(summary.latest_import.row_count)} registros importados.
+              </p>
+            )}
+          </>
+        )}
       </section>
 
       <section className="quick-section" aria-labelledby="quick-title">

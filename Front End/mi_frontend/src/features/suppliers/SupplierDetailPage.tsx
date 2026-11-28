@@ -1,29 +1,95 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Icon } from "../../components/Icon";
-import { supplierService } from "../../services/supplierService";
-import type { Supplier } from "../../types/supplier";
+import { ApiRequestError, perseoApi } from "../../services/perseoApi";
+import type { PerseoSupplier, SupplierMonthlyReport } from "../../types/perseoApi";
+
+function formatReportingPeriod(value: string) {
+  return new Intl.DateTimeFormat("es-CO", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function formatMetric(value: number) {
+  return `${new Intl.NumberFormat("es-CO", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value)} %`;
+}
 
 export function SupplierDetailPage() {
   const { supplierId } = useParams();
   const navigate = useNavigate();
-  const [supplier, setSupplier] = useState<Supplier>();
+  const [supplier, setSupplier] = useState<PerseoSupplier | null>(null);
+  const [reports, setReports] = useState<SupplierMonthlyReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    const controller = new AbortController();
     let active = true;
-    supplierService.getById(supplierId || "").then((result) => {
-      if (active) setSupplier(result);
-    });
-    return () => { active = false; };
-  }, [supplierId]);
+    setLoading(true);
+    setLoadError("");
+    setNotFound(false);
 
-  if (!supplier) {
+    Promise.all([
+      perseoApi.getSupplier(supplierId || "", controller.signal),
+      perseoApi.getSupplierReports(supplierId || "", controller.signal),
+    ])
+      .then(([supplierResult, reportResults]) => {
+        if (!active) return;
+        setSupplier(supplierResult);
+        setReports(reportResults);
+      })
+      .catch((error: unknown) => {
+        if (!active || (error instanceof DOMException && error.name === "AbortError")) return;
+        if (error instanceof ApiRequestError && error.status === 404) {
+          setNotFound(true);
+          return;
+        }
+        setLoadError(error instanceof Error ? error.message : "No fue posible consultar el proveedor.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [supplierId, reloadKey]);
+
+  if (loading) {
     return (
       <main className="supplier-page">
-        <section className="detail-empty">
-          <h1>Proveedor no encontrado</h1>
-          <p>El identificador no corresponde a un registro DEMO disponible.</p>
-          <button className="button-primary" type="button" onClick={() => navigate("/proveedores")}>Volver al directorio</button>
+        <p className="api-state" role="status">Cargando proveedor y reportes reales…</p>
+      </main>
+    );
+  }
+
+  if (loadError || notFound || !supplier) {
+    return (
+      <main className="supplier-page">
+        <section className="detail-empty" role={loadError ? "alert" : "status"}>
+          <h1>{notFound ? "Proveedor no encontrado" : "No se pudo cargar el proveedor"}</h1>
+          <p>
+            {loadError
+              ? `La consulta a la base de datos falló: ${loadError}`
+              : notFound
+                ? "El código no corresponde a un proveedor de la base de Power BI."
+                : "La API no devolvió información del proveedor."}
+          </p>
+          {loadError && (
+            <button className="button-primary" type="button" onClick={() => setReloadKey((value) => value + 1)}>
+              Reintentar
+            </button>
+          )}
+          <button className="report-button-secondary" type="button" onClick={() => navigate("/proveedores")}>
+            Volver al directorio
+          </button>
         </section>
       </main>
     );
@@ -40,48 +106,61 @@ export function SupplierDetailPage() {
         <div className="detail-title">
           <span className="detail-avatar" aria-hidden="true">{supplier.name.slice(0, 1)}</span>
           <div>
-            <p className="eyebrow"><span className="eyebrow-mark" />FICHA DE DEMOSTRACIÓN</p>
+            <p className="eyebrow"><span className="eyebrow-mark" />DATOS DE POWER BI</p>
             <h1>{supplier.name}</h1>
-            <p>{supplier.category} <span>·</span> {supplier.supplierType}</p>
+            <p>{supplier.code} <span>·</span> {supplier.report_count} reportes mensuales</p>
           </div>
         </div>
-        <button className="button-primary" type="button" onClick={() => navigate(`/comunicaciones/nueva?proveedor=${supplier.id}`)}>
-          <Icon name="send" size={17} />Iniciar comunicación
-        </button>
+        <span className="data-tag">SOLO LECTURA · PBIX</span>
       </section>
 
       <div className="detail-grid">
         <section className="detail-panel">
-          <div className="panel-heading"><div><p className="section-overline">INFORMACIÓN GENERAL</p><h2>Datos del proveedor</h2></div><span className={`supplier-status status-${supplier.status.toLowerCase().replace(" ", "-")}`}><span />{supplier.status}</span></div>
+          <div className="panel-heading">
+            <div><p className="section-overline">IDENTIFICACIÓN</p><h2>Datos disponibles</h2></div>
+            <span className={`supplier-status ${supplier.is_active ? "" : "status-inactivo"}`}>
+              <span />{supplier.is_active ? "Activo" : "Inactivo"}
+            </span>
+          </div>
           <dl className="detail-list">
-            <div><dt>Nombre</dt><dd>{supplier.name}</dd></div>
-            <div><dt>NIT / identificación</dt><dd>{supplier.nit || "No disponible"}</dd></div>
-            <div><dt>Código</dt><dd>{supplier.code || "No disponible"}</dd></div>
-            <div><dt>Correo principal</dt><dd>{supplier.email}</dd></div>
-            <div><dt>Persona de contacto</dt><dd>{supplier.contactName}</dd></div>
-            <div><dt>Teléfono</dt><dd>{supplier.phone || "No disponible"}</dd></div>
-            {supplier.address && <div><dt>Dirección</dt><dd>{supplier.address}</dd></div>}
-            {supplier.city && <div><dt>Ciudad</dt><dd>{supplier.city}</dd></div>}
-            {supplier.website && <div><dt>Sitio web</dt><dd>{supplier.website}</dd></div>}
+            <div><dt>Nombre del proveedor</dt><dd>{supplier.name}</dd></div>
+            <div><dt>NIT / código</dt><dd>{supplier.code}</dd></div>
+            <div><dt>Reportes mensuales</dt><dd>{new Intl.NumberFormat("es-CO").format(supplier.report_count)}</dd></div>
+            <div><dt>Último período</dt><dd>{supplier.latest_period ? formatReportingPeriod(supplier.latest_period) : "Sin reportes"}</dd></div>
           </dl>
+          <p className="api-source-note">
+            Esta base no contiene correos ni teléfonos de contacto; por eso las comunicaciones reales siguen deshabilitadas.
+          </p>
         </section>
 
         <aside className="detail-side">
           <section className="detail-panel">
-            <div className="panel-heading"><div><p className="section-overline">PERSONAS</p><h2>Contactos</h2></div></div>
-            <div className="contact-list">
-              {supplier.contacts.map((contact) => (
-                <article className="contact-card" key={`${contact.name}-${contact.email}`}>
-                  <span className="contact-avatar" aria-hidden="true">{contact.name.slice(0, 1)}</span>
-                  <div><strong>{contact.name}</strong><small>{contact.role}</small><a href={`mailto:${contact.email}`}>{contact.email}</a>{contact.phone && <span>{contact.phone}</span>}</div>
-                </article>
-              ))}
+            <div className="panel-heading">
+              <div><p className="section-overline">HISTORIAL IMPORTADO</p><h2>Indicadores por período</h2></div>
             </div>
+            {reports.length === 0 ? (
+              <p className="api-state">No hay reportes mensuales asociados a este proveedor.</p>
+            ) : (
+              <div className="real-report-list">
+                {reports.map((report) => (
+                  <article className="real-report-card" key={report.period_start}>
+                    <div className="real-report-heading">
+                      <strong>{formatReportingPeriod(report.period_start)}</strong>
+                      {report.result_label && <span>{report.result_label}</span>}
+                    </div>
+                    <dl>
+                      {report.metrics.map((metric) => (
+                        <div key={metric.code}>
+                          <dt>{metric.label}</dt>
+                          <dd>{formatMetric(metric.value)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
-          {supplier.complement && (
-            <section className="detail-note"><Icon name="sparkles" size={16} /><div><strong>Información complementaria</strong><p>{supplier.complement}</p></div></section>
-          )}
-          <div className="detail-demo"><span>DEMO</span> Datos ficticios. No representan una empresa real.</div>
         </aside>
       </div>
     </main>

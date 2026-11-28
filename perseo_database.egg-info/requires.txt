@@ -3,8 +3,14 @@ alembic<2.0,>=1.15
 psycopg[binary]<4.0,>=3.2
 python-dotenv<2.0,>=1.0
 
+[api]
+fastapi<1.0,>=0.115
+uvicorn[standard]<1.0,>=0.34
+
 [powerbi]
 pbixray<0.16,>=0.15.5
 
 [test]
 pytest<9.0,>=8.3
+fastapi<1.0,>=0.115
+httpx<1.0,>=0.27

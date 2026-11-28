@@ -4300,7 +4300,7 @@ input:focus-visible {
 
 .supplier-toolbar {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) repeat(3, minmax(150px, 170px)) auto;
+  grid-template-columns: minmax(260px, 1fr) minmax(150px, 170px) auto;
   gap: 9px;
   margin-bottom: 14px;
   padding: 10px;
@@ -4831,7 +4831,7 @@ input:focus-visible {
 
 @media (max-width: 1180px) {
   .supplier-toolbar {
-    grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(130px, 150px)) auto;
+    grid-template-columns: minmax(220px, 1fr) minmax(150px, 170px) auto;
   }
 }
 
@@ -4853,12 +4853,163 @@ input:focus-visible {
   }
 
   .detail-side {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .compose-layout {
     grid-template-columns: 240px minmax(0, 1fr);
   }
+}
+
+.api-state {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.api-state-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid #f0d7d4;
+  border-radius: 12px;
+  background: #fff8f7;
+  color: #8e3d35;
+}
+
+.api-state-error p {
+  margin: 0;
+}
+
+.api-refresh-status {
+  margin: 8px 0;
+  color: #718078;
+  font-size: 11px;
+}
+
+.api-refresh-error {
+  color: #a34a40;
+}
+
+.api-source-note {
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid #d5a62e;
+  border-radius: 0 8px 8px 0;
+  background: #fffaf0;
+  color: #725b24;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.supplier-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.supplier-pagination .clear-filter {
+  min-height: 32px;
+  padding: 0 12px;
+}
+
+.supplier-pagination .clear-filter:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.data-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid #d9e8dd;
+  border-radius: 999px;
+  background: #f2f8f3;
+  color: #367447;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.supplier-status.status-inactivo {
+  color: #64748b;
+}
+
+.supplier-status.status-inactivo span {
+  background: #94a3b8;
+}
+
+.real-report-list {
+  display: grid;
+  gap: 10px;
+  max-height: 640px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.real-report-card {
+  padding: 12px;
+  border: 1px solid #e8edf2;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.real-report-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 12px;
+}
+
+.real-report-heading > span {
+  color: #64748b;
+  font-size: 10px;
+  text-align: right;
+}
+
+.real-report-card dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.real-report-card dl div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.real-report-card dt {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.real-report-card dd {
+  margin: 0;
+  color: #263648;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.report-button-secondary {
+  min-height: 40px;
+  margin-left: 8px;
+  padding: 0 14px;
+  color: #526459;
+  font-size: 12px;
+  border: 1px solid #e1e8e1;
+  border-radius: 10px;
+  background: #f8faf7;
+  cursor: pointer;
 }
 
 @media (max-width: 760px) {
@@ -4907,6 +5058,19 @@ input:focus-visible {
 
   .supplier-toolbar select {
     width: 100%;
+  }
+
+  .supplier-footer {
+    height: auto;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 15px;
+  }
+
+  .supplier-pagination {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .detail-header {
@@ -5574,6 +5738,47 @@ select:focus-visible {
 .supplier-status > span {
   background: #c7f763;
   box-shadow: 0 0 10px rgb(199 247 99 / 65%);
+}
+
+.api-state {
+  color: #a7b3ab;
+}
+
+.api-state-error {
+  color: #f0aaa0;
+  border-color: rgb(215 116 104 / 20%);
+  background: rgb(116 42 36 / 16%);
+}
+
+.api-refresh-error {
+  color: #e8a39b;
+}
+
+.api-source-note {
+  color: #d3c28f;
+  border-left-color: #b89a48;
+  background: rgb(119 93 34 / 13%);
+}
+
+.real-report-card {
+  border-color: rgb(218 235 224 / 8%);
+  background: rgb(255 255 255 / 2%);
+}
+
+.real-report-heading,
+.real-report-card dd {
+  color: #dce7df;
+}
+
+.real-report-heading > span,
+.real-report-card dt {
+  color: #89978f;
+}
+
+.report-button-secondary {
+  color: #c3cec7;
+  border-color: rgb(218 235 224 / 9%);
+  background: rgb(255 255 255 / 3%);
 }
 
 .status-inactivo > span {
