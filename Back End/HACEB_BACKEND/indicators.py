@@ -1,6 +1,7 @@
 """Motor de indicadores HACEB. No gestiona HTTP, persistencia ni correos."""
 import csv
 import io
+import math
 
 REQUIRED_COLUMNS = {
     "supplier_id", "supplier_name", "supplier_email", "order_id",
@@ -36,6 +37,8 @@ def parse_and_calculate(content: bytes):
             required = float(vals["required_quantity"])
             delivered = float(vals["delivered_on_time"])
         except ValueError:
+            error("INVALID_QUANTITY", f"Cantidad inválida en la fila {row_no}.")
+        if not math.isfinite(required) or not math.isfinite(delivered):
             error("INVALID_QUANTITY", f"Cantidad inválida en la fila {row_no}.")
         if required <= 0 or delivered < 0 or delivered > required:
             error("INVALID_QUANTITY_RANGE", f"Cantidad fuera de rango en la fila {row_no}.")
